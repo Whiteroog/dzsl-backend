@@ -9,6 +9,7 @@ import { User } from '@prisma/client'
 import { hash, verify } from 'argon2'
 import { PrismaService } from 'src/prisma.service'
 import { AuthDto } from './dto/auth.dto'
+import { RefreshTokenDto } from './dto/refreshToken.dto'
 
 @Injectable()
 export class AuthService {
@@ -84,6 +85,27 @@ export class AuthService {
 		return {
 			id: user.id,
 			login: user.login
+		}
+	}
+
+	async getNewTokens({ refreshToken }: RefreshTokenDto) {
+		if (!refreshToken) throw new UnauthorizedException('Войдите в систему!')
+
+		const result = await this.jwt.verifyAsync<{ id: number }>(refreshToken)
+
+		if (!result) throw new UnauthorizedException('Токен не валидный')
+
+		const user = await this.prisma.user.findUnique({
+			where: {
+				id: result.id
+			}
+		})
+
+		const tokens = await this.issueTokenPair(user.id)
+
+		return {
+			user: this.returnUserFields(user),
+			...tokens
 		}
 	}
 }
