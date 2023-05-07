@@ -23,8 +23,8 @@ model Product {
   name String @unique
   slug String @unique
 
-  price  Int
-  images String[]
+  price Int
+  image String
 
   description String
 
@@ -77,6 +77,10 @@ model Order {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now()) @map("created_at")
 
+  fullName String
+  email    String
+  phone    String
+
   status EnumOrderStatus @default(NEW)
 
   total Int
@@ -118,7 +122,7 @@ model OrderProductItem {
 
 enum EnumOrderStatus {
   NEW
-  MADING
+  MAKING
   WAITING
   DISPATCHED
   RECEIVED
