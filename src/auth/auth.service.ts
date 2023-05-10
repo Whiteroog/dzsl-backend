@@ -16,13 +16,13 @@ export class AuthService {
 	constructor(private prisma: PrismaService, private jwt: JwtService) {}
 
 	async register(dto: AuthDto) {
-		const userExists = await this.prisma.user.findUnique({
+		const existsUser = await this.prisma.user.findUnique({
 			where: {
 				login: dto.login
 			}
 		})
 
-		if (userExists)
+		if (existsUser)
 			throw new BadRequestException('Пользователь с таким логином существует')
 
 		const newUser = await this.prisma.user.create({
@@ -32,7 +32,7 @@ export class AuthService {
 			}
 		})
 
-		const tokens = await this.issueTokenPair(newUser.id)
+		const tokens = await this.issueTokens(newUser.id)
 
 		return {
 			user: this.returnUserFields(newUser),
@@ -43,12 +43,45 @@ export class AuthService {
 	async login(dto: AuthDto) {
 		const user = await this.validateUser(dto)
 
-		const tokens = await this.issueTokenPair(user.id)
+		const tokens = await this.issueTokens(user.id)
 
 		return {
 			user: this.returnUserFields(user),
 			...tokens
 		}
+	}
+
+	async getNewTokens({ refreshToken }: RefreshTokenDto) {
+		const result = await this.jwt.verifyAsync(refreshToken)
+
+		if (!result) throw new UnauthorizedException('Токен не валидный')
+
+		const user = await this.prisma.user.findUnique({
+			where: {
+				id: result.id
+			}
+		})
+
+		const tokens = await this.issueTokens(user.id)
+
+		return {
+			user: this.returnUserFields(user),
+			...tokens
+		}
+	}
+
+	private async issueTokens(userId: number) {
+		const data = { id: userId }
+
+		const accessToken = this.jwt.sign(data, {
+			expiresIn: '1m'
+		})
+
+		const refreshToken = this.jwt.sign(data, {
+			expiresIn: '1h'
+		})
+
+		return { accessToken, refreshToken }
 	}
 
 	async validateUser(dto: AuthDto) {
@@ -67,45 +100,10 @@ export class AuthService {
 		return user
 	}
 
-	private async issueTokenPair(userId: number) {
-		const data = { id: userId }
-
-		const accessToken = await this.jwt.signAsync(data, {
-			expiresIn: '15m'
-		})
-
-		const refreshToken = await this.jwt.signAsync(data, {
-			expiresIn: '1h'
-		})
-
-		return { accessToken, refreshToken }
-	}
-
 	private returnUserFields(user: User) {
 		return {
 			id: user.id,
 			login: user.login
-		}
-	}
-
-	async getNewTokens({ refreshToken }: RefreshTokenDto) {
-		if (!refreshToken) throw new UnauthorizedException('Войдите в систему!')
-
-		const result = await this.jwt.verifyAsync<{ id: number }>(refreshToken)
-
-		if (!result) throw new UnauthorizedException('Токен не валидный')
-
-		const user = await this.prisma.user.findUnique({
-			where: {
-				id: result.id
-			}
-		})
-
-		const tokens = await this.issueTokenPair(user.id)
-
-		return {
-			user: this.returnUserFields(user),
-			...tokens
 		}
 	}
 }
