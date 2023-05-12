@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common'
 import { EnumOrderStatus } from '@prisma/client'
 import { Auth } from 'src/auth/decorators/auth.decorator'
-import { OrderDto, OrderProductDto, OrderProductItemDto } from './order.dto'
+import { OrderDto } from './order.dto'
 import { OrderService } from './order.service'
 
 @Controller('orders')
@@ -33,23 +33,5 @@ export class OrderController {
 	@Post()
 	async createOrder(@Body() dto: OrderDto) {
 		return this.orderService.createOrder(dto)
-	}
-
-	@Auth()
-	@Post('product/:orderId')
-	async createOrderProduct(
-		@Param() orderId: number,
-		@Body() dto: OrderProductDto
-	) {
-		return this.orderService.createOrderProduct(orderId, dto)
-	}
-
-	@Auth()
-	@Post('product/item/:orderProductId')
-	async createOrderProductItem(
-		@Param() orderProductId: number,
-		@Body() dto: OrderProductItemDto
-	) {
-		return this.orderService.createOrderProductItem(orderProductId, dto)
 	}
 }

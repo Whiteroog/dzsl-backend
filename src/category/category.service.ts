@@ -7,19 +7,10 @@ import { returnCategoryObject } from './return-category.object'
 export class CategoryService {
 	constructor(private prisma: PrismaService) {}
 
-	async byId(id: number) {
-		const category = await this.prisma.category.findUnique({
-			where: {
-				id
-			},
+	async getAll() {
+		return this.prisma.category.findMany({
 			select: returnCategoryObject
 		})
-
-		if (!category) {
-			throw new NotFoundException('Категория не найдена')
-		}
-
-		return category
 	}
 
 	async bySlug(slug: string) {
@@ -37,18 +28,24 @@ export class CategoryService {
 		return category
 	}
 
-	async getAll() {
-		return this.prisma.category.findMany({
+	async byId(id: number) {
+		const category = await this.prisma.category.findUnique({
+			where: {
+				id
+			},
 			select: returnCategoryObject
 		})
+
+		if (!category) {
+			throw new NotFoundException('Категория не найдена')
+		}
+
+		return category
 	}
 
-	async create() {
+	async create(dto: CategoryDto) {
 		return this.prisma.category.create({
-			data: {
-				name: '',
-				slug: ''
-			}
+			data: dto
 		})
 	}
 
@@ -57,10 +54,7 @@ export class CategoryService {
 			where: {
 				id
 			},
-			data: {
-				name: dto.name,
-				slug: dto.slug
-			}
+			data: dto
 		})
 	}
 

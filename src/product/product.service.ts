@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { PrismaService } from 'src/prisma.service'
-import { ProductDto, ProductItemDto, SpecificationsDto } from './product.dto'
+import { ProductDto, UpdateProductDto } from './product.dto'
 import { returnProductObject } from './return-product.object'
 
 @Injectable()
@@ -51,35 +51,99 @@ export class ProductService {
 		return product
 	}
 
-	async createProduct() {
+	async create(dto: ProductDto) {
 		return await this.prisma.product.create({
 			data: {
-				name: '',
-				slug: '',
-				price: 0,
-				image: 'no-image.png',
-				description: ''
+				name: dto.name,
+				slug: dto.slug,
+				price: dto.price,
+				image: dto.image,
+				description: dto.description,
+				category: {
+					connectOrCreate: {
+						where: {
+							id: dto.category.id
+						},
+						create: dto.category
+					}
+				},
+				specifications: {
+					createMany: {
+						data: dto.specifications
+					}
+				},
+				productItems: {
+					createMany: {
+						data: dto.productItems
+					}
+				}
 			}
 		})
 	}
 
-	async updateProduct(id: number, dto: ProductDto) {
-		const { name, slug, price, image, description, categoryId } = dto
+	async update(id: number, dto: UpdateProductDto) {
+		dto.updateSpecifications.forEach(item => {
+			this.prisma.specifications.update({
+				where: { id: item.id },
+				data: {
+					name: item.name,
+					value: item.value
+				}
+			})
+		})
+
+		dto.updateProductItems.forEach(item => {
+			this.prisma.productItem.update({
+				where: { id: item.id },
+				data: {
+					name: item.name,
+					quantity: item.quantity,
+					price: item.price
+				}
+			})
+		})
 
 		return await this.prisma.product.update({
 			where: { id },
 			data: {
-				name,
-				slug,
-				price,
-				image,
-				description,
-				categoryId
+				name: dto.product.name,
+				slug: dto.product.slug,
+				price: dto.product.price,
+				image: dto.product.image,
+				description: dto.product.description,
+				category: {
+					connectOrCreate: {
+						where: {
+							id: dto.product.category.id
+						},
+						create: dto.product.category
+					}
+				},
+				specifications: {
+					deleteMany: {
+						id: {
+							in: dto.deleteSpecifications.map(item => item.id)
+						}
+					},
+					createMany: {
+						data: dto.createSpecifications
+					}
+				},
+				productItems: {
+					deleteMany: {
+						id: {
+							in: dto.deleteProductItems.map(item => item.id)
+						}
+					},
+					createMany: {
+						data: dto.createProductItems
+					}
+				}
 			}
 		})
 	}
 
-	async deleteProduct(id: number) {
+	async delete(id: number) {
 		await this.prisma.specifications.deleteMany({
 			where: {
 				productId: id
@@ -96,60 +160,6 @@ export class ProductService {
 			where: {
 				id
 			}
-		})
-	}
-
-	async createSpecifications(productId: number) {
-		return await this.prisma.specifications.create({
-			data: {
-				name: '',
-				value: 0,
-				productId
-			}
-		})
-	}
-
-	async updateSpecifications(id: number, dto: SpecificationsDto) {
-		return await this.prisma.specifications.update({
-			where: { id },
-			data: {
-				name: dto.name,
-				value: dto.value
-			}
-		})
-	}
-
-	async deleteSpecifications(id: number) {
-		return await this.prisma.specifications.delete({
-			where: { id }
-		})
-	}
-
-	async createProductItem(productId: number) {
-		return await this.prisma.productItem.create({
-			data: {
-				name: '',
-				quantity: 1,
-				price: 0,
-				productId
-			}
-		})
-	}
-
-	async updateProductItem(id: number, dto: ProductItemDto) {
-		return await this.prisma.productItem.update({
-			where: { id },
-			data: {
-				name: dto.name,
-				quantity: dto.quantity,
-				price: dto.price
-			}
-		})
-	}
-
-	async deleteProductItem(id: number) {
-		return await this.prisma.productItem.delete({
-			where: { id }
 		})
 	}
 }

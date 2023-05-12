@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common'
 import { Auth } from 'src/auth/decorators/auth.decorator'
-import { ProductDto, ProductItemDto, SpecificationsDto } from './product.dto'
+import { ProductDto, UpdateProductDto } from './product.dto'
 import { ProductService } from './product.service'
 
 @Controller('products')
@@ -30,61 +30,19 @@ export class ProductController {
 
 	@Auth()
 	@Post()
-	async createProduct() {
-		return this.productService.createProduct()
+	async create(@Body() dto: ProductDto) {
+		return this.productService.create(dto)
 	}
 
 	@Auth()
 	@Put(':id')
-	async updateProduct(@Param('id') id: string, @Body() dto: ProductDto) {
-		return this.productService.updateProduct(Number(id), dto)
+	async update(@Param('id') id: string, @Body() dto: UpdateProductDto) {
+		return this.productService.update(Number(id), dto)
 	}
 
 	@Auth()
 	@Delete(':id')
-	async deleteProduct(@Param('id') id: string) {
-		return this.productService.deleteProduct(Number(id))
-	}
-
-	@Auth()
-	@Post('specifications/:productId')
-	async createSpecifications(@Param('productId') productId: string) {
-		return this.productService.createSpecifications(Number(productId))
-	}
-
-	@Auth()
-	@Put('specifications/:id')
-	async updateSpecifications(
-		@Param('id') id: string,
-		@Body() dto: SpecificationsDto
-	) {
-		return this.productService.updateSpecifications(Number(id), dto)
-	}
-
-	@Auth()
-	@Delete('specifications/:id')
-	async deleteSpecifications(@Param('id') id: string) {
-		return this.productService.deleteSpecifications(Number(id))
-	}
-
-	@Auth()
-	@Post('product-item/:productId')
-	async createProductItem(@Param('productId') productId: string) {
-		return this.productService.createProductItem(Number(productId))
-	}
-
-	@Auth()
-	@Put('product-item/:id')
-	async updateProductItem(
-		@Param('id') id: string,
-		@Body() dto: ProductItemDto
-	) {
-		return this.productService.updateProductItem(Number(id), dto)
-	}
-
-	@Auth()
-	@Delete('product-item/:id')
-	async deleteProductItem(@Param('id') id: string) {
-		return this.productService.deleteProductItem(Number(id))
+	async delete(@Param('id') id: string) {
+		return this.productService.delete(Number(id))
 	}
 }

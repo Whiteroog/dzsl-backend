@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { EnumOrderStatus } from '@prisma/client'
 import { PrismaService } from 'src/prisma.service'
-import { OrderDto, OrderProductDto, OrderProductItemDto } from './order.dto'
+import { OrderDto } from './order.dto'
 import { returnOrderObject } from './return-order.object'
 
 @Injectable()
@@ -31,7 +31,20 @@ export class OrderService {
 				email: dto.email,
 				phone: dto.phone,
 				status: EnumOrderStatus.NEW,
-				totalPrice: dto.totalPrice
+				totalPrice: dto.totalPrice,
+				orderProduct: {
+					create: {
+						name: dto.orderProduct.name,
+						category: dto.orderProduct.category,
+						quantity: dto.orderProduct.quantity,
+						price: dto.orderProduct.price,
+						orderProductItems: {
+							createMany: {
+								data: dto.orderProduct.orderProductItems
+							}
+						}
+					}
+				}
 			}
 		})
 	}
@@ -41,32 +54,6 @@ export class OrderService {
 			where: { id },
 			data: {
 				status
-			}
-		})
-	}
-
-	async createOrderProduct(orderId: number, dto: OrderProductDto) {
-		return this.prisma.orderProduct.create({
-			data: {
-				name: dto.name,
-				category: dto.category,
-				quantity: dto.quantity,
-				price: dto.price,
-				orderId
-			}
-		})
-	}
-
-	async createOrderProductItem(
-		orderProductId: number,
-		dto: OrderProductItemDto
-	) {
-		return this.prisma.orderProductItem.create({
-			data: {
-				name: dto.name,
-				quantity: dto.quantity,
-				price: dto.price,
-				orderProductId
 			}
 		})
 	}
