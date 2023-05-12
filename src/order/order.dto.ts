@@ -3,18 +3,18 @@ export class OrderDto {
 	email: string
 	phone: string
 	totalPrice: number
-	orderProduct: OrderProductDto
+	orderProduct: IOrderProduct
 }
 
-export class OrderProductDto {
+interface IOrderProduct {
 	name: string
 	category: string
 	quantity: number
 	price: number
-	orderProductItems: OrderProductItemDto[]
+	orderProductItems: IOrderProductItem[]
 }
 
-export class OrderProductItemDto {
+interface IOrderProductItem {
 	name: string
 	quantity: number
 	price: number

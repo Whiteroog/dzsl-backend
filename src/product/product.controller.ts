@@ -13,18 +13,18 @@ export class ProductController {
 	}
 
 	@Get('by-category/:categorySlug')
-	async getProductsByCategory(@Param('categorySlug') categorySlug: string) {
+	async getByCategory(@Param('categorySlug') categorySlug: string) {
 		return this.productService.byCategory(categorySlug)
 	}
 
 	@Get('by-slug/:slug')
-	async getProductsBySlug(@Param('slug') slug: string) {
+	async getBySlug(@Param('slug') slug: string) {
 		return this.productService.bySlug(slug)
 	}
 
 	@Auth()
 	@Get(':id')
-	async getProductsById(@Param('id') id: string) {
+	async getById(@Param('id') id: string) {
 		return this.productService.byId(Number(id))
 	}
 

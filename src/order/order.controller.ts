@@ -16,13 +16,13 @@ export class OrderController {
 
 	@Auth()
 	@Get(':id')
-	async getOrdersById(@Param('id') id: string) {
+	async getById(@Param('id') id: string) {
 		return this.orderService.byId(Number(id))
 	}
 
 	@Auth()
 	@Patch(':id')
-	async updateOrderStatus(
+	async updateStatus(
 		@Param('id') id: string,
 		@Body() { status }: { status: EnumOrderStatus }
 	) {
@@ -31,7 +31,7 @@ export class OrderController {
 
 	@Auth()
 	@Post()
-	async createOrder(@Body() dto: OrderDto) {
-		return this.orderService.createOrder(dto)
+	async create(@Body() dto: OrderDto) {
+		return this.orderService.create(dto)
 	}
 }

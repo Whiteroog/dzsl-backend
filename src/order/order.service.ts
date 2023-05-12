@@ -24,7 +24,7 @@ export class OrderService {
 		return order
 	}
 
-	async createOrder(dto: OrderDto) {
+	async create(dto: OrderDto) {
 		return this.prisma.order.create({
 			data: {
 				fullName: dto.fullName,
