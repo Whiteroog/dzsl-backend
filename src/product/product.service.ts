@@ -22,8 +22,6 @@ export class ProductService {
 			},
 			select: returnProductObject
 		})
-
-		if (!products) throw new NotFoundException('Товар не найден')
 		return products
 	}
 

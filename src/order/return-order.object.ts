@@ -8,7 +8,7 @@ export const returnOrderObject: Prisma.OrderSelect = {
 	phone: true,
 	totalPrice: true,
 	status: true,
-	orderProducts: {
+	orderProduct: {
 		select: {
 			id: true,
 			name: true,
