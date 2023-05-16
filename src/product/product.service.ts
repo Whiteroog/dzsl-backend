@@ -9,7 +9,8 @@ export class ProductService {
 
 	async getAll() {
 		return this.prisma.product.findMany({
-			select: returnProductObject
+			select: returnProductObject,
+			orderBy: { id: 'desc' }
 		})
 	}
 
@@ -20,7 +21,8 @@ export class ProductService {
 					slug: categorySlug
 				}
 			},
-			select: returnProductObject
+			select: returnProductObject,
+			orderBy: { id: 'desc' }
 		})
 		return products
 	}

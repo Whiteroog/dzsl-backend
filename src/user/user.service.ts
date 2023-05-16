@@ -10,7 +10,8 @@ export class UserService {
 
 	async getAll() {
 		return this.prisma.user.findMany({
-			select: returnUserObject
+			select: returnUserObject,
+			orderBy: { id: 'desc' }
 		})
 	}
 

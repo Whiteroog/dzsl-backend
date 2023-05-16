@@ -23,7 +23,7 @@ interface IProductItem {
 }
 
 interface ICategory {
-	id?: number
+	id: number
 	name: string
 	slug: string
 }

@@ -9,7 +9,8 @@ export class CategoryService {
 
 	async getAll() {
 		return this.prisma.category.findMany({
-			select: returnCategoryObject
+			select: returnCategoryObject,
+			orderBy: { id: 'desc' }
 		})
 	}
 
