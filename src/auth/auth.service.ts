@@ -54,7 +54,7 @@ export class AuthService {
 	async getNewTokens({ refreshToken }: RefreshTokenDto) {
 		const result = await this.jwt.verifyAsync(refreshToken)
 
-		if (!result) throw new UnauthorizedException('Токен не валидный')
+		if (!result) throw new UnauthorizedException('Ошибка токена')
 
 		const user = await this.prisma.user.findUnique({
 			where: {
@@ -74,11 +74,11 @@ export class AuthService {
 		const data = { id: userId }
 
 		const accessToken = await this.jwt.signAsync(data, {
-			expiresIn: '5m'
+			expiresIn: '5m' // 5m
 		})
 
 		const refreshToken = await this.jwt.signAsync(data, {
-			expiresIn: '1h'
+			expiresIn: '10m' // 30m
 		})
 
 		return { accessToken, refreshToken }
