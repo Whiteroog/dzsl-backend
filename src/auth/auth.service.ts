@@ -52,21 +52,25 @@ export class AuthService {
 	}
 
 	async getNewTokens({ refreshToken }: RefreshTokenDto) {
-		const result = await this.jwt.verifyAsync(refreshToken)
+		try {
+			const result = await this.jwt.verifyAsync(refreshToken)
 
-		if (!result) throw new UnauthorizedException('Ошибка токена')
+			if (!result) throw new UnauthorizedException('Ошибка токена')
 
-		const user = await this.prisma.user.findUnique({
-			where: {
-				id: result.id
+			const user = await this.prisma.user.findUnique({
+				where: {
+					id: result.id
+				}
+			})
+
+			const tokens = await this.issueTokens(user.id)
+
+			return {
+				user: this.returnUserFields(user),
+				...tokens
 			}
-		})
-
-		const tokens = await this.issueTokens(user.id)
-
-		return {
-			user: this.returnUserFields(user),
-			...tokens
+		} catch (error) {
+			throw new UnauthorizedException(error)
 		}
 	}
 
