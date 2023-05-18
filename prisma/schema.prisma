@@ -24,9 +24,9 @@ model Product {
   slug String @unique
 
   price Int
-  image String
+  image String?
 
-  description String
+  description String?
 
   specifications Specifications[]
 
@@ -49,7 +49,7 @@ model Specifications {
 model ProductItem {
   id Int @id @default(autoincrement())
 
-  name String @unique
+  name String
 
   quantity Int
   price    Int

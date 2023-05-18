@@ -2,8 +2,8 @@ export class ProductDto {
 	name: string
 	slug: string
 	price: number
-	image: string
-	description: string
+	image?: string
+	description?: string
 	category: ICategory
 	specifications?: ISpecifications[]
 	productItems?: IProductItem[]
@@ -31,11 +31,18 @@ interface ICategory {
 export class UpdateProductDto {
 	product: ProductDto
 
-	createSpecifications?: ISpecifications[]
-	updateSpecifications?: ISpecifications[]
-	deleteSpecifications?: ISpecifications[]
+	specifications: IEditSpecifications
+	productItems: IEditProductItems
+}
 
-	createProductItems?: IProductItem[]
-	updateProductItems?: IProductItem[]
-	deleteProductItems?: IProductItem[]
+export interface IEditSpecifications {
+	createSpecifications: ISpecifications[]
+	updateSpecifications: ISpecifications[]
+	deleteSpecifications: ISpecifications[]
+}
+
+export interface IEditProductItems {
+	createProductItems: IProductItem[]
+	updateProductItems: IProductItem[]
+	deleteProductItems: IProductItem[]
 }

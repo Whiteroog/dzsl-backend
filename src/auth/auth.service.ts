@@ -82,7 +82,7 @@ export class AuthService {
 		})
 
 		const refreshToken = await this.jwt.signAsync(data, {
-			expiresIn: '10m' // 30m
+			expiresIn: '30m' // 30m
 		})
 
 		return { accessToken, refreshToken }

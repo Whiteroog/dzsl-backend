@@ -52,56 +52,94 @@ export class ProductService {
 	}
 
 	async create(dto: ProductDto) {
-		return await this.prisma.product.create({
+		const product = await this.prisma.product.create({
 			data: {
 				name: dto.name,
 				slug: dto.slug,
-				price: dto.price,
+				price: Number(dto.price),
 				image: dto.image,
 				description: dto.description,
 				category: {
-					connectOrCreate: {
-						where: {
-							id: dto.category.id
-						},
-						create: dto.category
-					}
-				},
-				specifications: {
-					createMany: {
-						data: dto.specifications
-					}
-				},
-				productItems: {
-					createMany: {
-						data: dto.productItems
+					connect: {
+						id: dto.category.id
 					}
 				}
 			}
 		})
+
+		if (dto.specifications) {
+			await this.prisma.specifications.createMany({
+				data: dto.specifications.map(item => ({
+					...item,
+					productId: product.id
+				}))
+			})
+		}
+
+		if (dto.productItems) {
+			await this.prisma.productItem.createMany({
+				data: dto.productItems.map(item => ({ ...item, productId: product.id }))
+			})
+		}
+
+		return product
 	}
 
 	async update(id: number, dto: UpdateProductDto) {
-		dto.updateSpecifications.forEach(item => {
-			this.prisma.specifications.update({
-				where: { id: item.id },
-				data: {
-					name: item.name,
-					value: item.value
+		if (dto.specifications.createSpecifications) {
+			await this.prisma.specifications.createMany({
+				data: dto.specifications.createSpecifications.map(item => ({
+					...item,
+					productId: id
+				}))
+			})
+		}
+		if (dto.specifications.updateSpecifications) {
+			dto.specifications.updateSpecifications.forEach(async item => {
+				await this.prisma.specifications.update({
+					where: { id: item.id },
+					data: {
+						name: item.name,
+						value: item.value
+					}
+				})
+			})
+		}
+		if (dto.specifications.deleteSpecifications) {
+			await this.prisma.specifications.deleteMany({
+				where: {
+					productId: id
 				}
 			})
-		})
+		}
 
-		dto.updateProductItems.forEach(item => {
-			this.prisma.productItem.update({
-				where: { id: item.id },
-				data: {
-					name: item.name,
-					quantity: item.quantity,
-					price: item.price
+		if (dto.productItems.createProductItems) {
+			await this.prisma.productItem.createMany({
+				data: dto.productItems.createProductItems.map(item => ({
+					...item,
+					productId: id
+				}))
+			})
+		}
+		if (dto.productItems.updateProductItems) {
+			dto.productItems.updateProductItems.forEach(async item => {
+				await this.prisma.productItem.update({
+					where: { id: item.id },
+					data: {
+						name: item.name,
+						quantity: item.quantity,
+						price: item.price
+					}
+				})
+			})
+		}
+		if (dto.productItems.deleteProductItems) {
+			await this.prisma.productItem.deleteMany({
+				where: {
+					productId: id
 				}
 			})
-		})
+		}
 
 		return await this.prisma.product.update({
 			where: { id },
@@ -112,31 +150,8 @@ export class ProductService {
 				image: dto.product.image,
 				description: dto.product.description,
 				category: {
-					connectOrCreate: {
-						where: {
-							id: dto.product.category.id
-						},
-						create: dto.product.category
-					}
-				},
-				specifications: {
-					deleteMany: {
-						id: {
-							in: dto.deleteSpecifications.map(item => item.id)
-						}
-					},
-					createMany: {
-						data: dto.createSpecifications
-					}
-				},
-				productItems: {
-					deleteMany: {
-						id: {
-							in: dto.deleteProductItems.map(item => item.id)
-						}
-					},
-					createMany: {
-						data: dto.createProductItems
+					connect: {
+						id: dto.product.category.id
 					}
 				}
 			}
@@ -144,13 +159,13 @@ export class ProductService {
 	}
 
 	async delete(id: number) {
-		await this.prisma.specifications.deleteMany({
+		await this.prisma.productItem.deleteMany({
 			where: {
 				productId: id
 			}
 		})
 
-		await this.prisma.productItem.deleteMany({
+		await this.prisma.specifications.deleteMany({
 			where: {
 				productId: id
 			}
