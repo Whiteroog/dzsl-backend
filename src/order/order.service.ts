@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { EnumOrderStatus } from '@prisma/client'
 import { PrismaService } from 'src/prisma.service'
 import { OrderDto } from './order.dto'
@@ -6,7 +6,11 @@ import { returnOrderObject } from './return-order.object'
 
 @Injectable()
 export class OrderService {
-	constructor(private prisma: PrismaService) {}
+	logger: Logger
+
+	constructor(private prisma: PrismaService) {
+		this.logger = new Logger()
+	}
 
 	async getAll() {
 		return this.prisma.order.findMany({
@@ -32,7 +36,7 @@ export class OrderService {
 				email: dto.email,
 				phone: dto.phone,
 				status: EnumOrderStatus.NEW,
-				totalPrice: dto.totalPrice,
+				totalPrice: Number(dto.totalPrice),
 				orderProduct: {
 					create: {
 						name: dto.orderProduct.name,

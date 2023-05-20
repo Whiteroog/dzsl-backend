@@ -1,14 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { PrismaService } from 'src/prisma.service'
 import { ProductDto, UpdateProductDto } from './product.dto'
 import { returnProductObject } from './return-product.object'
 
 @Injectable()
 export class ProductService {
-	constructor(private prisma: PrismaService) {}
+	logger: Logger
+
+	constructor(private prisma: PrismaService) {
+		this.logger = new Logger()
+	}
 
 	async getAll() {
-		return this.prisma.product.findMany({
+		return await this.prisma.product.findMany({
 			select: returnProductObject,
 			orderBy: { id: 'desc' }
 		})
@@ -70,7 +74,8 @@ export class ProductService {
 		if (dto.specifications) {
 			await this.prisma.specifications.createMany({
 				data: dto.specifications.map(item => ({
-					...item,
+					name: item.name,
+					value: item.value,
 					productId: product.id
 				}))
 			})
@@ -78,7 +83,12 @@ export class ProductService {
 
 		if (dto.productItems) {
 			await this.prisma.productItem.createMany({
-				data: dto.productItems.map(item => ({ ...item, productId: product.id }))
+				data: dto.productItems.map(item => ({
+					name: item.name,
+					quantity: item.quantity,
+					price: item.price,
+					productId: product.id
+				}))
 			})
 		}
 
@@ -86,10 +96,27 @@ export class ProductService {
 	}
 
 	async update(id: number, dto: UpdateProductDto) {
+		const product = await this.prisma.product.update({
+			where: { id },
+			data: {
+				name: dto.product.name,
+				slug: dto.product.slug,
+				price: Number(dto.product.price),
+				image: dto.product.image,
+				description: dto.product.description,
+				category: {
+					connect: {
+						id: dto.product.category.id
+					}
+				}
+			}
+		})
+
 		if (dto.specifications.createSpecifications) {
 			await this.prisma.specifications.createMany({
 				data: dto.specifications.createSpecifications.map(item => ({
-					...item,
+					name: item.name,
+					value: item.value,
 					productId: id
 				}))
 			})
@@ -108,7 +135,9 @@ export class ProductService {
 		if (dto.specifications.deleteSpecifications) {
 			await this.prisma.specifications.deleteMany({
 				where: {
-					productId: id
+					id: {
+						in: dto.specifications.deleteSpecifications.map(item => item.id)
+					}
 				}
 			})
 		}
@@ -116,7 +145,9 @@ export class ProductService {
 		if (dto.productItems.createProductItems) {
 			await this.prisma.productItem.createMany({
 				data: dto.productItems.createProductItems.map(item => ({
-					...item,
+					name: item.name,
+					quantity: item.quantity,
+					price: item.price,
 					productId: id
 				}))
 			})
@@ -136,26 +167,14 @@ export class ProductService {
 		if (dto.productItems.deleteProductItems) {
 			await this.prisma.productItem.deleteMany({
 				where: {
-					productId: id
+					id: {
+						in: dto.productItems.deleteProductItems.map(item => item.id)
+					}
 				}
 			})
 		}
 
-		return await this.prisma.product.update({
-			where: { id },
-			data: {
-				name: dto.product.name,
-				slug: dto.product.slug,
-				price: dto.product.price,
-				image: dto.product.image,
-				description: dto.product.description,
-				category: {
-					connect: {
-						id: dto.product.category.id
-					}
-				}
-			}
-		})
+		return product
 	}
 
 	async delete(id: number) {

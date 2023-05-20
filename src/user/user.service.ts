@@ -9,7 +9,7 @@ export class UserService {
 	constructor(private prisma: PrismaService) {}
 
 	async getAll() {
-		return this.prisma.user.findMany({
+		return await this.prisma.user.findMany({
 			select: returnUserObject,
 			orderBy: { id: 'desc' }
 		})
@@ -36,7 +36,7 @@ export class UserService {
 	}
 
 	async delete(id: number) {
-		return this.prisma.user.delete({
+		return await this.prisma.user.delete({
 			where: {
 				id
 			}

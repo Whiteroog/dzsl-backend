@@ -8,7 +8,7 @@ export class CategoryService {
 	constructor(private prisma: PrismaService) {}
 
 	async getAll() {
-		return this.prisma.category.findMany({
+		return await this.prisma.category.findMany({
 			select: returnCategoryObject,
 			orderBy: { id: 'desc' }
 		})
@@ -45,13 +45,13 @@ export class CategoryService {
 	}
 
 	async create(dto: CategoryDto) {
-		return this.prisma.category.create({
+		return await this.prisma.category.create({
 			data: dto
 		})
 	}
 
 	async update(id: number, dto: CategoryDto) {
-		return this.prisma.category.update({
+		return await this.prisma.category.update({
 			where: {
 				id
 			},
@@ -60,7 +60,7 @@ export class CategoryService {
 	}
 
 	async delete(id: number) {
-		return this.prisma.category.delete({
+		return await this.prisma.category.delete({
 			where: {
 				id
 			}
