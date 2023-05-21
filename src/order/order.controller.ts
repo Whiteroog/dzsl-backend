@@ -8,6 +8,11 @@ import { OrderService } from './order.service'
 export class OrderController {
 	constructor(private readonly orderService: OrderService) {}
 
+	@Post()
+	async create(@Body() dto: OrderDto) {
+		return this.orderService.create(dto)
+	}
+
 	@Auth()
 	@Get()
 	async getAll() {
@@ -27,11 +32,5 @@ export class OrderController {
 		@Body() { status }: { status: EnumOrderStatus }
 	) {
 		return this.orderService.updateStatus(Number(id), status)
-	}
-
-	@Auth()
-	@Post()
-	async create(@Body() dto: OrderDto) {
-		return this.orderService.create(dto)
 	}
 }
