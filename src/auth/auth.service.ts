@@ -70,7 +70,7 @@ export class AuthService {
 				...tokens
 			}
 		} catch (error) {
-			throw new UnauthorizedException(error)
+			throw new UnauthorizedException(() => error)
 		}
 	}
 
